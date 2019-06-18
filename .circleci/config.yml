@@ -100,9 +100,10 @@ commands:
           name: printing env and sleeping 30s
           command: |
             set -euxo pipefail
-            env | grep CIRCLE
+            hidesecrets() { grep -vE '(TOKEN|SECRET|PASS|AUTH)'; }
+            env | grep CIRCLE | hidesecrets
             echo ==================
-            env
+            env | hidesecrets
             echo ==================
             whoami
             echo ==================
