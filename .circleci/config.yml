@@ -99,9 +99,14 @@ commands:
       - run:
           name: printing env and sleeping 30s
           command: |
-            set -euo pipefail
+            set -euxo pipefail
             env | grep CIRCLE
-            echo "Sleeping for 30s"; sleep 30
+            echo ==================
+            env
+            echo ==================
+            whoami
+            echo ==================
+            sleep 30
             exit <<parameters.exit_code>>
       - github_status/report
 
@@ -109,6 +114,9 @@ executors:
   buildpack_deps:
     docker:
       - image: circleci/buildpack-deps:19.04-curl
+  classic_machine:
+    machine:
+      image: circleci/classic:latest
 
 jobs:
   print_env_success:
@@ -121,11 +129,23 @@ jobs:
     steps:
       - print_env:
           exit_code: 1
+  print_env_success_machine:
+    executor: classic_machine
+    steps:
+      - print_env:
+          exit_code: 0
+  print_env_fail_machine:
+    executor: classic_machine
+    steps:
+      - print_env:
+          exit_code: 1
 
 workflows:
   failing:
     jobs:
       - print_env_success
+      - print_env_success_machine
   succeeding:
     jobs:
       - print_env_fail
+      - print_env_fail_machine
